@@ -4328,12 +4328,14 @@ function CaseFans({
     <group>
 
       {/* Soft cool light from the intake side */}
-      <pointLight
-        position={[innerRight - 0.4, 3.1, 0.2]}
-        intensity={1.5}
-        distance={3.5}
-        color="#9ad7ff"
-      />
+ {/* RGB spill from the case onto the desk (like real build photos)
+     Kept low, right at desk level, so the glass panel doesn't reflect it */}
+ <pointLight
+  position={[CASE.x, 0.15, 2.8]}
+  intensity={1.6}
+  distance={4}
+  color="#c04dff"
+ />
 
       {/* FRONT INTAKE (right wall), facing into the case */}
       {intakeYs.map((y, i) => {
