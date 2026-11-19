@@ -5998,7 +5998,7 @@ function useBootPhase(powered) {
     const id = setInterval(() => {
       const s = (performance.now() - start) / 1000;
       setT(s);
-      if (s > 6) clearInterval(id);
+            if (s > 35) clearInterval(id);
     }, 100);
 
     return () => clearInterval(id);
@@ -6010,17 +6010,17 @@ function useBootPhase(powered) {
 function Monitor({ powered }) {
   const t = useBootPhase(powered);
 
-  const phase = !powered
+    const phase = !powered
     ? "off"
-    : t < 1.5
+    : t < 5
     ? "logo"
-    : t < 5.2
+    : t < 15
     ? "post"
     : "desktop";
 
   const postCount =
     phase === "post"
-      ? Math.min(POST_LINES.length, Math.floor((t - 1.5) / 0.42) + 1)
+      ? Math.min(POST_LINES.length, Math.floor((t - 5) / 1.2) + 1)
       : POST_LINES.length;
 
   const isDesktop = phase === "desktop";
