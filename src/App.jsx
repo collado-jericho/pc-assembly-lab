@@ -6,6 +6,8 @@ import React, {
   useState,
 } from "react";
 
+import { animate, stagger } from "animejs";
+
 import {
   Canvas,
   useThree,
@@ -637,9 +639,22 @@ function PCAssemblyLab({ mode, onFinish }) {
   const [notice, setNotice] = useState("");
 
   const showNotice = (msg) => {
-    setNotice(msg);
-    setTimeout(() => setNotice(""), 3500);
-  };
+   setNotice(msg);
+   setTimeout(() => setNotice(""), 3500);
+ };
+
+ // Notice fades and slides in, with a small shake to catch the eye
+ useEffect(() => {
+   if (!notice) return undefined;
+   const a = animate(".notice", {
+     opacity: [0, 1],
+     marginTop: [-16, 0],
+     marginLeft: [0, -6, 6, -4, 4, 0],
+     duration: 550,
+     ease: "outExpo",
+   });
+   return () => a.revert();
+ }, [notice]);
 
   const diagnosisOptions = useMemo(
     () =>
@@ -1500,8 +1515,56 @@ const downloadResultsCSV = () => {
 ========================================================= */
 
 function SimulatorHome({ onSelectMode, studentName, onNameChange, onDownload }) {
-  return (
-    <div className="flow-screen">
+  // Entrance animation: header → name box → cards → download button
+  useEffect(() => {
+    const anims = [
+      // logo pops in with a springy wobble
+      animate(".brand-icon", {
+        scale: [0.5, 1],
+        rotate: [-15, 0],
+        duration: 1200,
+        ease: "outElastic(1, .5)",
+      }),
+
+      // title, subtitle and name box rise in one after another
+      animate(".flow-header h1, .flow-header p, .flow-name-input", {
+        opacity: [0, 1],
+        translateY: [24, 0],
+        duration: 700,
+        delay: stagger(90, { start: 150 }),
+        ease: "outExpo",
+      }),
+
+      // the 3 mode cards bounce up one after another
+      animate(".flow-card", {
+        opacity: [0, 1],
+        translateY: [40, 0],
+        scale: [0.92, 1],
+        duration: 800,
+        delay: stagger(120, { start: 400 }),
+        ease: "outBack(1.4)",
+      }),
+
+      // download button fades in last
+      animate(".flow-download-btn", {
+        opacity: [0, 1],
+        duration: 600,
+        delay: 850,
+        ease: "outQuad",
+      }),
+    ];
+
+    return () => anims.forEach((a) => a.revert());
+  }, []);
+
+  // Hover: card lifts up a little
+  const lift = (e) =>
+    animate(e.currentTarget, { translateY: -6, scale: 1.03, duration: 300, ease: "outQuad" });
+  const drop = (e) =>
+    animate(e.currentTarget, { translateY: 0, scale: 1, duration: 300, ease: "outQuad" });
+
+ return (
+  <div className="flow-screen">
       <div className="flow-header">
         <span className="brand-icon">🖥️</span>
         <h1>PC Assembly Lab</h1>
@@ -1518,19 +1581,19 @@ function SimulatorHome({ onSelectMode, studentName, onNameChange, onDownload }) 
       />
 
       <div className="flow-choices">
-        <button className="flow-card" onClick={() => onSelectMode("assemble")}>
+            <button className="flow-card" onClick={() => onSelectMode("assemble")} onMouseEnter={lift} onMouseLeave={drop}>
           <span className="flow-card-icon">🔧</span>
           <strong>Computer Assembly</strong>
           <span>Build a PC from scratch, part by part.</span>
         </button>
 
-        <button className="flow-card" onClick={() => onSelectMode("disassemble")}>
+            <button className="flow-card" onClick={() => onSelectMode("disassemble")} onMouseEnter={lift} onMouseLeave={drop}>
           <span className="flow-card-icon">🧰</span>
           <strong>Computer Disassembly</strong>
           <span>Start with a complete PC and safely remove each part.</span>
         </button>
 
-        <button className="flow-card" onClick={() => onSelectMode("diagnose")}>
+            <button className="flow-card" onClick={() => onSelectMode("diagnose")} onMouseEnter={lift} onMouseLeave={drop}>
           <span className="flow-card-icon">🩺</span>
           <strong>Fault Diagnosis</strong>
           <span>A built PC has a problem. Find the cause and fix it.</span>
@@ -2563,6 +2626,16 @@ function FrontPanel({ onPower, powered, onTogglePanel }) {
   const W = CASE.width;
   const H = CASE.height;
 
+  // Panel slides in from the front when you put it on
+  const panelRef = useRef();
+  useEffect(() => {
+    if (!panelRef.current) return undefined;
+    const p = panelRef.current.position;
+    p.z = CASE.depth / 2 + 1.4;
+    const a = animate(p, { z: CASE.depth / 2, duration: 700, ease: "outExpo" });
+    return () => a.pause();
+  }, []);
+
   // LEDs sit 0.14 in from every edge so the case frame
   // (front posts, top panel, bottom panel) doesn't cover them.
   const LED_INSET = 0.14;
@@ -2580,7 +2653,7 @@ function FrontPanel({ onPower, powered, onTogglePanel }) {
   ];
 
   return (
-    <group position={[0, H / 2, CASE.depth / 2]}>
+    <group ref={panelRef} position={[0, H / 2, CASE.depth / 2]}>
 
       {/* Tempered-glass front panel (click to open/close) */}
       <RoundedBox
@@ -4418,6 +4491,33 @@ function FanVisual({
    INSTALLED COMPONENTS
 ========================================================= */
 
+/* =========================================================
+   INSTALL POP: part bounces into its socket when installed
+========================================================= */
+
+function InstallPop({ children }) {
+  const ref = useRef();
+
+  useEffect(() => {
+    if (!ref.current) return undefined;
+
+    const s = ref.current.scale;
+    s.set(0.8, 0.8, 0.8);
+
+    const anim = animate(s, {
+      x: 1,
+      y: 1,
+      z: 1,
+      duration: 550,
+      ease: "outBack(2)",
+    });
+
+    return () => anim.pause();
+  }, []);
+
+  return <group ref={ref}>{children}</group>;
+}
+
 function InstalledComponents({
   installed,
   mode,
@@ -4452,7 +4552,7 @@ function InstalledComponents({
       document.body.style.cursor = "default";
     }}
   >
-    <CPUInstalled />
+       <InstallPop><CPUInstalled /></InstallPop>
   </group>
 )}
 
@@ -4470,7 +4570,7 @@ function InstalledComponents({
     }}
     onPointerOut={() => { document.body.style.cursor = "default"; }}
   >
-    <CoolerInstalled />
+    <InstallPop><CoolerInstalled /></InstallPop>
   </group>
 )}
 
@@ -4487,7 +4587,7 @@ function InstalledComponents({
     }}
     onPointerOut={() => { document.body.style.cursor = "default"; }}
   >
-    <RAMInstalled />
+    <InstallPop><RAMInstalled /></InstallPop>
   </group>
 )}
 
@@ -4504,7 +4604,7 @@ function InstalledComponents({
     }}
     onPointerOut={() => { document.body.style.cursor = "default"; }}
   >
-       <GPUInstalled powered={powered} />
+       <InstallPop><GPUInstalled powered={powered} /></InstallPop>
   </group>
 )}
 
@@ -4521,7 +4621,7 @@ function InstalledComponents({
     }}
     onPointerOut={() => { document.body.style.cursor = "default"; }}
   >
-    <SSDInstalled />
+  <InstallPop><SSDInstalled /></InstallPop>
   </group>
 )}
 
@@ -4542,7 +4642,7 @@ function InstalledComponents({
     }}
     onPointerOut={() => { document.body.style.cursor = "default"; }}
   >
-    <ChipsetInstalled />
+    <InstallPop><ChipsetInstalled /></InstallPop>
   </group>
 )}
 
@@ -4597,7 +4697,7 @@ function InstalledComponents({
     }}
     onPointerOut={() => { document.body.style.cursor = "default"; }}
   >
-    <CMOSInstalled />
+  <InstallPop><CMOSInstalled /></InstallPop>
   </group>
 )}
 
@@ -4615,7 +4715,7 @@ function InstalledComponents({
     }}
     onPointerOut={() => { document.body.style.cursor = "default"; }}
   >
-    <ATX24Installed />
+   <InstallPop><ATX24Installed /></InstallPop>
   </group>
 )}
 
@@ -4632,7 +4732,7 @@ function InstalledComponents({
     }}
     onPointerOut={() => { document.body.style.cursor = "default"; }}
   >
-    <PSUInstalled />
+   <InstallPop><PSUInstalled /></InstallPop>
   </group>
 )}
 
@@ -4649,7 +4749,7 @@ function InstalledComponents({
     }}
     onPointerOut={() => { document.body.style.cursor = "default"; }}
   >
-    <HDDInstalled />
+    <InstallPop><HDDInstalled /></InstallPop>
   </group>
 )}
 
