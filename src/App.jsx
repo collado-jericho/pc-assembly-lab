@@ -2838,15 +2838,6 @@ function CaseFrame() {
         </RoundedBox>
       ))}
 
-      <Text
-        position={[0, H + 0.18, 0]}
-        fontSize={0.18}
-        color="#c4cbd0"
-        anchorX="center"
-      >
-        PC CASE
-      </Text>
-
     </group>
   );
 }
