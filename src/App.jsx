@@ -139,7 +139,7 @@ const PARTS = [
     type: "ram",
     color: "#20b967",
     size: [0.12, 0.62, 0.06],
-  start: [-3.23, 3.30, 0.65],
+    start: [-4.88, 0.75, 0.65],
     slot: SLOTS.ram,
     snap: 0.45,
     requires: ["cpu"],
