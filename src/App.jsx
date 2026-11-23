@@ -6904,6 +6904,33 @@ const RACK = {
   z: 0.15,                                  // ★ in front of the monitor, on the desk
 };
 
+/* ★ Short labels shown on the rack (full name still shows on hover) */
+const RACK_LABELS = {
+  cpu: "CPU",
+  cooler: "CPU Cooler",
+  ram: "RAM",
+  gpu: "GPU",
+  ssd: "M.2 SSD",
+  psu: "PSU",
+  fan: "Case Fan",
+  hdd: "3.5\" HDD",
+  chipset: "Chipset",
+  pcieWifi: "Wi-Fi Card",
+  pcieSound: "Sound Card",
+  cmos: "CMOS Battery",
+  atx24: "24-Pin",
+  eps8: "EPS 8-Pin",
+  cpuFan: "CPU_FAN",
+  gpuPower: "GPU Power",
+  sataData: "SATA Data",
+  sataPower: "SATA Power",
+  caseFan: "SYS_FAN Cable",
+  powerSW: "Power SW",
+};
+
+/* ★ Max size a part can take up inside its card (leaves room for the label) */
+const RACK_FIT = { maxW: 1.30, maxH: 0.62, maxScale: 1.8 };
+
 function PartsRack({ installed = [], show = true }) {
   const left = RACK.cols[0] - 0.85;
   const right = RACK.cols[RACK.cols.length - 1] + 0.85;
@@ -7061,8 +7088,33 @@ function DraggablePart({
   const dragging =
     useRef(false);
 
-  const latestPosition =
-    useRef(part.start);
+      const latestPosition =
+     useRef(part.start);
+
+    // ---- Auto-fit: scale the part's look so it fits its rack card ----
+    const fitRef = useRef();
+
+    useEffect(() => {
+      const g = fitRef.current;
+      if (!g) return;
+
+      // measure at normal size
+      g.scale.set(1, 1, 1);
+      g.updateWorldMatrix(true, true);
+      const box = new THREE.Box3().setFromObject(g);
+      const size = new THREE.Vector3();
+      box.getSize(size);
+
+      if (size.x <= 0 || size.y <= 0) return;
+
+      const s = Math.min(
+        RACK_FIT.maxW / size.x,
+        RACK_FIT.maxH / size.y,
+        RACK_FIT.maxScale
+      );
+
+      g.scale.set(s, s, s);
+    }, [installed, part.type]);
 
   const {
     camera,
@@ -7325,38 +7377,40 @@ onPointerOut={() => {
 }}
       >
 
-        <PartBody
-          part={part}
-          hovered={
-            hovered ||
-            validTarget
-          }
-        />
+         {/* Part look, auto-scaled to fit its rack card */}
+        <group ref={fitRef}>
+          <PartBody
+           part={part}
+           hovered={
+             hovered ||
+             validTarget
+           }
+          />
 
-        <PartVisual
-          type={part.type}
-        />
+          <PartVisual
+           type={part.type}
+          />
+        </group>
 
+        {/* Label: same spot on every card (bottom), short name; full name on hover */}
         <Text
-          position={[
-            0,
-            part.size[1] / 2 + 0.28,
-            0,
-          ]}
-          fontSize={0.15}
-          color={
-            validTarget
-              ? "#58e88a"
-              : hovered
-              ? "#61ddff"
-              : "#f1f5f7"
-          }
-          anchorX="center"
-          anchorY="middle"
-          outlineWidth={0.018}
-          outlineColor="#000000"
+         position={[0, -0.40, 0.30]}
+         fontSize={0.095}
+         color={
+           validTarget
+            ? "#58e88a"
+            : hovered
+            ? "#61ddff"
+            : "#e2e8ec"
+         }
+         anchorX="center"
+         anchorY="middle"
+         outlineWidth={0.012}
+         outlineColor="#000000"
         >
-          {part.name}
+         {hovered || validTarget
+           ? part.name
+           : RACK_LABELS[part.id] || part.name}
         </Text>
 
         {validTarget && (
