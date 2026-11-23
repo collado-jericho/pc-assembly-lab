@@ -261,7 +261,7 @@ const PARTS = [
     name: "24-Pin ATX Connector",
     type: "atx24",
     color: "#111418",
-    size: [0.22, 0.95, 0.16],
+    size: [0.95, 0.22, 0.16],
     start: [-4.88, 3.25, 0.65],
     slot: SLOTS.atx24,
     snap: 0.50,
@@ -8332,8 +8332,9 @@ function CMOSVisual() {
 ========================================================= */
 
 function ATX24Visual() {
-  return (
-    <group>
+ return (
+  // Rotated 90° so the plug lies horizontal (matches the motherboard socket)
+  <group rotation={[0, 0, Math.PI / 2]}>
 
       <RoundedBox
         args={[
