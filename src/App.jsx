@@ -91,10 +91,10 @@ const SLOTS = {
   atx24: [WORLD.boardX + 0.81, WORLD.boardY - 2.20, WORLD.boardZ + 0.18],
 
  // Power / front-panel connection targets.
- eps8: [WORLD.boardX - 0.93, WORLD.boardY - 2.28, WORLD.boardZ + 0.16],
+ eps8: [WORLD.boardX + 0.02, WORLD.boardY - 2.20, WORLD.boardZ + 0.16],
  cpuFan: [WORLD.boardX - 0.05 + CPU_SHIFT, WORLD.boardY + 2.20, WORLD.boardZ + 0.18],
  gpuPower: [WORLD.boardX + 1.54, WORLD.boardY - 1.70, WORLD.boardZ + 0.20],
- sataData: [WORLD.boardX + 0.02, WORLD.boardY - 2.20, WORLD.boardZ + 0.16],
+ sataData: [WORLD.boardX - 0.93, WORLD.boardY - 2.20, WORLD.boardZ + 0.16],
   sataPower: [CASE.x - 1.25 + 0.41, 0.24, 0.92 + 0.32],
   caseFan: [WORLD.boardX + 1.00, WORLD.boardY - 0.05, WORLD.boardZ + 0.18],
   powerSW: [WORLD.boardX + 1.54, WORLD.boardY - 1.20, WORLD.boardZ + 0.18],
@@ -3953,7 +3953,7 @@ function ConnectionSockets() {
     {/* 8-PIN CPU / EPS */}
 <EPSSocket
  position={[
-   -0.93,
+   0.02,
    -2.20,
    0.16
  ]}
@@ -3974,8 +3974,8 @@ function ConnectionSockets() {
   position={[1.00, -0.05, 0.18]}
 />
 
-   <SATADataSocket
- position={[0.02, -2.20, 0.16]}
+    <SATADataSocket
+ position={[-0.93, -2.20, 0.16]}
 />
 
 ```
@@ -4987,28 +4987,36 @@ const psuSATA = [
           BLUE
       ===================================================== */}
 
-      {has("sataData") && (
+           {has("sataData") && (
   <Cable
-    points={[
-           // starts at the HDD's front SATA data port
-          // 1. plugged into the DATA port on the HDD face
-     [local(SLOTS.hdd)[0] + 0.24, local(SLOTS.hdd)[1], local(SLOTS.hdd)[2] + 0.355],
-     // 2. straight out of the bay (past the cage front at +0.40)
-     [local(SLOTS.hdd)[0] + 0.24, local(SLOTS.hdd)[1], local(SLOTS.hdd)[2] + 0.48],
-     // 3. sideways, in front of the cage, out past its right wall
-     [local(SLOTS.hdd)[0] + 0.80, local(SLOTS.hdd)[1] + 0.25, local(SLOTS.hdd)[2] + 0.48],
-     // 4. up the right side of the cage
-     [local(SLOTS.hdd)[0] + 0.80, local(SLOTS.hdd)[1] + 0.60, local(SLOTS.hdd)[2] + 0.30],
-     [-0.45, 1.00, 0.30],
-      [
-        socket(SLOTS.sataData)[0] + 0.10,
-        socket(SLOTS.sataData)[1],
-        socket(SLOTS.sataData)[2] + 0.05,
-      ],
-      socket(SLOTS.sataData),
-    ]}
-    color="#3a86ff"
-    radius={0.019}
+   points={[
+    // 1. plugged into the DATA port on the HDD face
+    [local(SLOTS.hdd)[0] + 0.24, local(SLOTS.hdd)[1], local(SLOTS.hdd)[2] + 0.355],
+
+    // 2. straight out of the bay (past the cage front at +0.40)
+    [local(SLOTS.hdd)[0] + 0.24, local(SLOTS.hdd)[1], local(SLOTS.hdd)[2] + 0.48],
+
+    // 3. straight up in front of the cage, above its top plate
+    [local(SLOTS.hdd)[0] + 0.24, local(SLOTS.hdd)[1] + 0.62, local(SLOTS.hdd)[2] + 0.48],
+
+    // 4. back toward the board, just below the socket
+    [
+      socket(SLOTS.sataData)[0],
+      socket(SLOTS.sataData)[1] - 0.10,
+      socket(SLOTS.sataData)[2] + 0.40,
+    ],
+
+    // 5. lined up straight in front of the socket
+    [
+      socket(SLOTS.sataData)[0],
+      socket(SLOTS.sataData)[1],
+      socket(SLOTS.sataData)[2] + 0.15,
+    ],
+
+    socket(SLOTS.sataData),
+   ]}
+   color="#3a86ff"
+   radius={0.019}
   />
 )}
 
@@ -5023,22 +5031,31 @@ const psuSATA = [
           PURPLE
       ===================================================== */}
 
-      {has("eps8") && (
-  <Cable
-       points={[
-     psuCPU,
-     up(psuCPU),
-     [0.0, 1.30, 0.5],
-      [
-        socket(SLOTS.eps8)[0] + 0.15,
-        socket(SLOTS.eps8)[1],
-        socket(SLOTS.eps8)[2] + 0.05,
-      ],
-      socket(SLOTS.eps8),
-    ]}
-    color="#ff9f1c"
-    radius={0.026}
-  />
+   {has("eps8") && (
+ <Cable
+    points={[
+  psuCPU,
+  up(psuCPU),
+
+  // across from the PSU toward the middle of the board
+  [
+    socket(SLOTS.eps8)[0] + 0.40,
+    socket(SLOTS.eps8)[1] + 0.05,
+    socket(SLOTS.eps8)[2] + 0.55,
+  ],
+
+  // lined up straight in front of the socket
+  [
+    socket(SLOTS.eps8)[0],
+    socket(SLOTS.eps8)[1],
+    socket(SLOTS.eps8)[2] + 0.20,
+  ],
+
+  socket(SLOTS.eps8),
+ ]}
+ color="#ff9f1c"
+ radius={0.026}
+/>
 )}
 
 
