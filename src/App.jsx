@@ -1079,13 +1079,6 @@ const removePart = (id) => {
   shadow-mapSize-height={2048}
 />
 
- {/* RGB spill from the case onto the desk (like real build photos) */}
- <pointLight
-  position={[CASE.x, 0.9, 2.4]}
-  intensity={2.2}
-  distance={5}
-  color="#c04dff"
- />
 
         <pointLight
           position={[-4, 5, 4]}
