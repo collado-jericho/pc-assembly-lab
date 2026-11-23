@@ -2650,6 +2650,90 @@ function CaseInteriorLight() {
   );
 }
 
+/* =========================================================
+   VENTED SIDE WALL: solid wall with a mesh-covered opening
+   where the fans are, so the fans are visible from outside.
+   Built from 4 solid pieces around the opening + a grille.
+========================================================= */
+
+function VentedSideWall({
+  x,              // wall position (left = -W/2, right = +W/2)
+  y1, y2,         // opening bottom / top
+  z1 = -0.5,      // opening back edge
+  z2 = 0.5,       // opening front edge
+}) {
+  const H = CASE.height;
+  const D = CASE.depth;
+  const T = 0.16; // wall thickness (same as before)
+
+  const metal = { color: "#252b31", metalness: 0.85, roughness: 0.22 };
+
+  // 4 solid pieces around the opening
+  const pieces = [
+    { pos: [x, y1 / 2, 0], size: [T, y1, D] },                                          // below
+    { pos: [x, (y2 + H) / 2, 0], size: [T, H - y2, D] },                                // above
+    { pos: [x, (y1 + y2) / 2, (z1 - D / 2) / 2], size: [T, y2 - y1, z1 + D / 2] },      // back side
+    { pos: [x, (y1 + y2) / 2, (z2 + D / 2) / 2], size: [T, y2 - y1, D / 2 - z2] },      // front side
+  ];
+
+  const openH = y2 - y1;
+  const openW = z2 - z1;
+  const midY = (y1 + y2) / 2;
+  const midZ = (z1 + z2) / 2;
+  const GAP = 0.1; // grille spacing
+
+  return (
+    <group>
+      {/* Solid wall pieces */}
+      {pieces.map((p, i) => (
+        <mesh key={`wall-${i}`} position={p.pos} castShadow>
+          <boxGeometry args={p.size} />
+          <meshStandardMaterial {...metal} />
+        </mesh>
+      ))}
+
+      {/* Dust filter: dark see-through fill */}
+      <mesh position={[x, midY, midZ]}>
+        <boxGeometry args={[0.004, openH, openW]} />
+        <meshStandardMaterial color="#050608" transparent opacity={0.35} depthWrite={false} />
+      </mesh>
+
+      {/* Mesh grille: vertical bars */}
+      {[...Array(Math.floor(openW / GAP) + 1)].map((_, i) => (
+        <mesh key={`grille-v-${i}`} position={[x, midY, z1 + i * GAP]}>
+          <boxGeometry args={[0.012, openH, 0.008]} />
+          <meshStandardMaterial color="#1b2025" metalness={0.7} roughness={0.35} />
+        </mesh>
+      ))}
+
+      {/* Mesh grille: horizontal bars */}
+      {[...Array(Math.floor(openH / GAP) + 1)].map((_, i) => (
+        <mesh key={`grille-h-${i}`} position={[x, y1 + i * GAP, midZ]}>
+          <boxGeometry args={[0.012, 0.008, openW]} />
+          <meshStandardMaterial color="#1b2025" metalness={0.7} roughness={0.35} />
+        </mesh>
+      ))}
+
+      {/* Trim around the opening (both sides of the wall) */}
+      {[-1, 1].map((side) => (
+        <group key={`trim-${side}`} position={[x + side * (T / 2 + 0.005), 0, 0]}>
+          {[
+            { pos: [0, y1, midZ], size: [0.01, 0.03, openW + 0.03] },
+            { pos: [0, y2, midZ], size: [0.01, 0.03, openW + 0.03] },
+            { pos: [0, midY, z1], size: [0.01, openH + 0.03, 0.03] },
+            { pos: [0, midY, z2], size: [0.01, openH + 0.03, 0.03] },
+          ].map((t, i) => (
+            <mesh key={i} position={t.pos}>
+              <boxGeometry args={t.size} />
+              <meshStandardMaterial color="#3a424a" metalness={0.9} roughness={0.2} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+    </group>
+  );
+}
+
 function CaseFrame() {
   const W = CASE.width;
   const H = CASE.height;
@@ -2715,37 +2799,21 @@ function CaseFrame() {
 
       {/* LEFT SIDE */}
 
-      <RoundedBox
-        args={[0.16, H, D]}
-        position={[-W / 2, H / 2, 0]}
-        radius={0.04}
-        smoothness={3}
-      >
-
-        <meshStandardMaterial
-          color={metal}
-          metalness={0.85}
-          roughness={0.22}
-        />
-
-      </RoundedBox>
+{/* LEFT SIDE: rear exhaust fan opening (beside the CPU) */}
+<VentedSideWall
+  x={-W / 2}
+  y1={BOARD.y + 1.35 - 0.45}
+  y2={BOARD.y + 1.35 + 0.45}
+/>
 
       {/* RIGHT SIDE */}
 
-      <RoundedBox
-        args={[0.16, H, D]}
-        position={[W / 2, H / 2, 0]}
-        radius={0.04}
-        smoothness={3}
-      >
-
-        <meshStandardMaterial
-          color={metal}
-          metalness={0.85}
-          roughness={0.22}
-        />
-
-      </RoundedBox>
+{/* RIGHT SIDE: 3 front intake fans opening */}
+<VentedSideWall
+  x={W / 2}
+  y1={1.70}
+  y2={4.50}
+/>
 
       {/* FRONT POSTS */}
 
