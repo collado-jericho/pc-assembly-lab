@@ -116,7 +116,7 @@ const PARTS = [
     type: "cpu",
     color: "#c9c9c9",
     size: [0.42, 0.08, 0.42],
-    start: [-6.53, 3.30, 0.65],
+    start: [-6.53, 0.75, 0.65],
     slot: SLOTS.cpu,
     snap: 0.55,
   },
@@ -127,7 +127,7 @@ const PARTS = [
     type: "cooler",
     color: "#2d3237",
     size: [0.82, 0.28, 0.82],
-    start: [-4.88, 3.30, 0.65],
+    start: [-3.23, 0.75, 0.65],
     slot: SLOTS.cooler,
     snap: 0.60,
     requires: ["cpu", "ram"],
@@ -151,7 +151,7 @@ const PARTS = [
      type: "gpu",
      color: "#216bd1",
      size: [1.55, 0.18, 0.58],
-  	start: [-6.53, 4.55, 0.65],
+  	 start: [-6.53, 2.00, 0.65],
   slot: SLOTS.gpu,
   snap: 0.65,
   requires: ["cpu", "ram", "psu"],
@@ -163,7 +163,7 @@ const PARTS = [
     type: "ssd",
     color: "#aaaeb2",
     size: [0.65, 0.05, 0.16],
-    start: [-1.58, 3.30, 0.65],
+    start: [-1.58, 0.75, 0.65],
     slot: SLOTS.ssd,
     snap: 0.50,
     requires: ["cpu"],
@@ -175,7 +175,7 @@ const PARTS = [
     type: "psu",
     color: "#17191c",
     size: [0.90, 0.65, 1.15],
-    start: [-6.53, 7.05, 0.65],
+    start: [-6.53, 4.50, 0.65],
     slot: SLOTS.psu,
     snap: 0.65,
   },
@@ -186,7 +186,7 @@ const PARTS = [
     type: "fan",
     color: "#343a40",
     size: [0.70, 0.10, 0.70],
-    start: [-1.58, 4.55, 0.65],
+    start: [-1.58, 2.00, 0.65],
     slot: SLOTS.fan,
     snap: 1.2,
     requires: ["psu"],
@@ -198,7 +198,7 @@ const PARTS = [
     type: "hdd",
     color: "#5f666d",
     size: [0.80, 0.25, 0.50],
-    start: [-3.23, 4.55, 0.65],
+    start: [-3.23, 2.00, 0.65],
     slot: SLOTS.hdd,
     snap: 0.90,
     requires: ["psu"],
@@ -214,7 +214,7 @@ const PARTS = [
     type: "chipset",
     color: "#252b31",
     size: [0.62, 0.08, 0.48],
-    start: [-4.88, 4.55, 0.65],
+    start: [-4.88, 2.00, 0.65],
     slot: SLOTS.chipset,
     snap: 0.45,
     requires: ["cpu"],
@@ -226,7 +226,7 @@ const PARTS = [
     type: "pcieWifi",
     color: "#1d2730",
     size: [1.65, 0.12, 0.36],
-    start: [0.07, 4.55, 0.65],
+    start: [0.07, 2.00, 0.65],
     slot: SLOTS.pcieWifi,
     snap: 0.55,
     requires: ["gpu"],
@@ -238,7 +238,7 @@ const PARTS = [
     type: "pcieSound",
     color: "#202a31",
     size: [1.65, 0.12, 0.36],
-    start: [-6.53, 5.80, 0.65],
+    start: [-6.53, 3.25, 0.65],
     slot: SLOTS.pcieSound,
     snap: 0.55,
     requires: ["pcieWifi"],
@@ -250,7 +250,7 @@ const PARTS = [
     type: "cmos",
     color: "#c6c9cb",
     size: [0.42, 0.10, 0.42],
-    start: [0.07, 3.30, 0.65],
+    start: [0.07, 0.75, 0.65],
     slot: SLOTS.cmos,
     snap: 0.45,
     requires: ["cpu"],
@@ -262,7 +262,7 @@ const PARTS = [
     type: "atx24",
     color: "#111418",
     size: [0.22, 0.95, 0.16],
-    start: [-4.88, 5.80, 0.65],
+    start: [-4.88, 3.25, 0.65],
     slot: SLOTS.atx24,
     snap: 0.50,
     requires: ["psu"],
@@ -278,7 +278,7 @@ const PARTS = [
     type: "eps8",
     color: "#121518",
     size: [0.20, 0.38, 0.16],
-    start: [-3.23, 5.80, 0.65],
+    start: [-3.23, 3.25, 0.65],
     slot: SLOTS.eps8,
     snap: 0.45,
     requires: ["cpu", "psu"],
@@ -290,7 +290,7 @@ const PARTS = [
     type: "cpuFan",
     color: "#15191c",
     size: [0.18, 0.28, 0.14],
-    start: [-1.58, 5.80, 0.65],
+    start: [-1.58, 3.25, 0.65],
     slot: SLOTS.cpuFan,
     snap: 0.42,
     requires: ["cooler"],
@@ -302,7 +302,7 @@ const PARTS = [
     type: "gpuPower",
     color: "#0d1013",
     size: [0.18, 0.42, 0.14],
-    start: [0.07, 5.80, 0.65],
+    start: [0.07, 3.25, 0.65],
     slot: SLOTS.gpuPower,
     snap: 0.48,
     requires: ["gpu", "psu"],
@@ -314,7 +314,7 @@ const PARTS = [
     type: "sataData",
     color: "#9b2027",
     size: [0.14, 0.52, 0.10],
-    start: [-4.88, 7.05, 0.65],
+    start: [-4.88, 4.50, 0.65],
     slot: SLOTS.sataData,
     snap: 0.48,
     requires: ["hdd", "psu"]
@@ -326,7 +326,7 @@ const PARTS = [
     type: "sataPower",
     color: "#141619",
     size: [0.16, 0.52, 0.12],
-    start: [-3.23, 7.05, 0.65],
+    start: [-3.23, 4.50, 0.65],
     slot: SLOTS.sataPower,
     snap: 0.48,
     requires: ["hdd", "psu"],
@@ -338,7 +338,7 @@ const PARTS = [
   type: "caseFan",
   color: "#171a1d",
   size: [0.18, 0.28, 0.14],
-  start: [-1.58, 7.05, 0.65],
+  start: [-1.58, 4.50, 0.65],
   slot: SLOTS.caseFan,
   snap: 0.85,
   requires: ["fan"],
@@ -350,7 +350,7 @@ const PARTS = [
     type: "powerSW",
     color: "#20252a",
     size: [0.16, 0.26, 0.12],
-    start: [0.07, 7.05, 0.65],
+    start: [0.07, 4.50, 0.65],
     slot: SLOTS.powerSW,
     snap: 0.42,
     requires: ["atx24"],
@@ -1127,7 +1127,20 @@ const removePart = (id) => {
         <PeripheralCablesWorld powered={powered} />
 
         {/* Wall rack that holds the loose parts */}
-        <PartsRack installed={installed} />
+                {/* Parts rack on the desk:
+            - Assembly: shows until every part is installed, then folds away
+            - Disassembly: always shows, so removed parts have a place to go
+            - Diagnosis: shows only after the fault is found, until it's fixed */}
+        <PartsRack
+          installed={installed}
+          show={
+            mode === "disassemble"
+              ? true
+              : mode === "diagnose"
+              ? diagnosed && installed.length < PARTS.length
+              : installed.length < PARTS.length
+          }
+        />
 
         {PARTS.filter(
             (part) =>
@@ -6885,65 +6898,114 @@ function Cable({
 
 const RACK = {
   cols: [-6.53, -4.88, -3.23, -1.58, 0.07], // ★ slot x positions
-  rows: [3.30, 4.55, 5.80, 7.05],           // ★ shelf heights (bottom → top)
+  rows: [0.75, 2.00, 3.25, 4.50],           // ★ shelf heights: bottom row sits on the table
   cardW: 1.5,
   cardH: 1.05,
-  z: 0.15,                                  // backboard sits behind the parts
+  z: 0.15,                                  // ★ in front of the monitor, on the desk
 };
 
-function PartsRack({ installed = [] }) {
+function PartsRack({ installed = [], show = true }) {
   const left = RACK.cols[0] - 0.85;
   const right = RACK.cols[RACK.cols.length - 1] + 0.85;
-  const bottom = RACK.rows[0] - 0.65;
+  const bottom = 0.01;                                   // desk surface
   const top = RACK.rows[RACK.rows.length - 1] + 0.65;
 
   const W = right - left;
   const H = top - bottom;
   const cx = (left + right) / 2;
   const cy = (top + bottom) / 2;
+  const depthZ = RACK.z + 0.42;                          // middle of the shelf depth
+
+  /* ----- Show / hide: rack folds down into the table ----- */
+  const groupRef = useRef();
+  const firstRun = useRef(true);
+
+  useEffect(() => {
+    const g = groupRef.current;
+    if (!g) return undefined;
+
+    // On first load: no animation, just start in the right state
+    if (firstRun.current) {
+      firstRun.current = false;
+      g.scale.y = show ? 1 : 0.001;
+      g.visible = show;
+      return undefined;
+    }
+
+    if (show) g.visible = true;
+
+    const a = animate(g.scale, {
+      y: show ? 1 : 0.001,
+      duration: show ? 700 : 600,
+      ease: show ? "outBack(1.2)" : "inBack(1.4)",
+      onComplete: () => {
+        if (!show) g.visible = false;
+      },
+    });
+
+    return () => a.pause();
+  }, [show]);
 
   return (
-    <group>
+    // group origin is at desk level, so scaling Y folds the rack down into the table
+    <group ref={groupRef}>
 
-      {/* Backboard */}
+      {/* Backboard (reaches the desk) */}
       <RoundedBox args={[W, H, 0.08]} position={[cx, cy, RACK.z]} radius={0.05} smoothness={3}>
         <meshStandardMaterial color="#11151a" metalness={0.5} roughness={0.5} />
       </RoundedBox>
 
-      {/* Frame edge */}
-      <RoundedBox args={[W + 0.12, H + 0.12, 0.05]} position={[cx, cy, RACK.z - 0.04]} radius={0.06} smoothness={3}>
+      {/* Side panels (stand on the desk) */}
+      {[left - 0.05, right + 0.05].map((x) => (
+        <RoundedBox
+          key={`rack-side-${x}`}
+          args={[0.10, H, 0.95]}
+          position={[x, cy, depthZ]}
+          radius={0.03}
+          smoothness={2}
+        >
+          <meshStandardMaterial color="#262c33" metalness={0.8} roughness={0.3} />
+        </RoundedBox>
+      ))}
+
+      {/* Base plinth (sits on the desk) */}
+      <RoundedBox args={[W + 0.2, 0.08, 0.95]} position={[cx, 0.05, depthZ]} radius={0.02} smoothness={2}>
+        <meshStandardMaterial color="#1a1f25" metalness={0.7} roughness={0.35} />
+      </RoundedBox>
+
+      {/* Top cap */}
+      <RoundedBox args={[W + 0.2, 0.06, 0.95]} position={[cx, top, depthZ]} radius={0.02} smoothness={2}>
         <meshStandardMaterial color="#262c33" metalness={0.8} roughness={0.3} />
       </RoundedBox>
 
       {/* Title */}
-      <Text position={[cx, top + 0.25, RACK.z + 0.05]} fontSize={0.22} color="#c4cbd0" anchorX="center" fontWeight="bold">
+      <Text position={[cx, top + 0.28, depthZ]} fontSize={0.22} color="#c4cbd0" anchorX="center" fontWeight="bold">
         PARTS RACK
       </Text>
-      <Text position={[cx, top + 0.06, RACK.z + 0.05]} fontSize={0.08} color="#6b7680" anchorX="center">
+      <Text position={[cx, top + 0.10, depthZ]} fontSize={0.08} color="#6b7680" anchorX="center">
         Drag a part from its slot into the PC
       </Text>
 
       {/* Shelves, each with a thin blue light along the front edge */}
       {RACK.rows.map((y) => (
-        <group key={`shelf-${y}`} position={[cx, y - 0.58, 0]}>
-          <RoundedBox args={[W, 0.05, 0.85]} position={[0, 0, 0.55]} radius={0.015} smoothness={2}>
+        <group key={`shelf-${y}`} position={[cx, y - 0.58, RACK.z]}>
+          <RoundedBox args={[W, 0.05, 0.85]} position={[0, 0, 0.42]} radius={0.015} smoothness={2}>
             <meshStandardMaterial color="#1f252c" metalness={0.7} roughness={0.35} />
           </RoundedBox>
-          <mesh position={[0, 0, 0.98]}>
+          <mesh position={[0, 0, 0.85]}>
             <boxGeometry args={[W, 0.012, 0.012]} />
             <meshStandardMaterial color="#3b82f6" emissive="#3b82f6" emissiveIntensity={1.2} toneMapped={false} />
           </mesh>
         </group>
       ))}
 
-      {/* One slot card per part, placed at the part's start position */}
+      {/* One slot card per part, at the part's start position */}
       {PARTS.map((part) => {
         const [x, y] = part.start;
         const done = installed.includes(part.id);
 
         return (
           <group key={`slot-${part.id}`} position={[x, y, RACK.z + 0.05]}>
-            {/* slot card */}
             <RoundedBox args={[RACK.cardW, RACK.cardH, 0.02]} radius={0.04} smoothness={2}>
               <meshStandardMaterial
                 color={done ? "#0f2a1c" : "#171c22"}
@@ -6952,13 +7014,11 @@ function PartsRack({ installed = [] }) {
               />
             </RoundedBox>
 
-            {/* accent line at the bottom of the card */}
             <mesh position={[0, -RACK.cardH / 2 + 0.05, 0.015]}>
               <boxGeometry args={[RACK.cardW - 0.2, 0.012, 0.004]} />
               <meshBasicMaterial color={done ? "#4ade80" : "#2b333c"} />
             </mesh>
 
-            {/* status label once installed */}
             {done && (
               <Text position={[0, -0.36, 0.02]} fontSize={0.075} color="#4ade80" anchorX="center" anchorY="middle">
                 INSTALLED
