@@ -4811,48 +4811,100 @@ function FanVisual({
   rgbOffset = 0,
 }) {
   const blades = useRef();
+  const speed = useRef({ v: 0 }); // 0 = stopped, 1 = full speed
 
-  // Spin only when the PC is powered on
+  // Spin up over ~1.8 s at power on, coast down over ~2.6 s at power off
+  useEffect(() => {
+    const a = animate(speed.current, {
+      v: spinning ? 1 : 0,
+      duration: spinning ? 1800 : 2600,
+      ease: spinning ? "inOutQuad" : "outCubic",
+    });
+    return () => a.pause();
+  }, [spinning]);
+
   useFrame((_, delta) => {
-    if (blades.current && spinning) {
-      blades.current.rotation.z -= delta * 10;
+    if (blades.current) {
+      blades.current.rotation.z -= delta * 10 * speed.current.v;
     }
   });
+
+  // Open frame: rounded square with a round hole (see-through from both sides)
+  const frameGeo = useMemo(() => {
+    const s = 0.39;   // half of the 0.78 frame
+    const r = 0.05;   // corner rounding
+    const shape = new THREE.Shape();
+    shape.moveTo(-s + r, -s);
+    shape.lineTo(s - r, -s);
+    shape.quadraticCurveTo(s, -s, s, -s + r);
+    shape.lineTo(s, s - r);
+    shape.quadraticCurveTo(s, s, s - r, s);
+    shape.lineTo(-s + r, s);
+    shape.quadraticCurveTo(-s, s, -s, s - r);
+    shape.lineTo(-s, -s + r);
+    shape.quadraticCurveTo(-s, -s, -s + r, -s);
+
+    const hole = new THREE.Path();
+    hole.absarc(0, 0, 0.34, 0, Math.PI * 2, true);
+    shape.holes.push(hole);
+
+    const g = new THREE.ExtrudeGeometry(shape, {
+      depth: 0.06,
+      bevelEnabled: false,
+      curveSegments: 40,
+    });
+    g.translate(0, 0, -0.03); // center it on z = 0
+    return g;
+  }, []);
 
   return (
     <group position={position} rotation={rotation}>
 
-      {/* Square frame */}
-      <RoundedBox args={[0.78, 0.78, 0.06]} radius={0.05} smoothness={3}>
+      {/* Open frame */}
+      <mesh geometry={frameGeo}>
         <meshStandardMaterial color="#15191d" metalness={0.5} roughness={0.35} />
-      </RoundedBox>
-
-      {/* Dark opening so the blades stand out */}
-      <mesh position={[0, 0, 0.031]}>
-        <circleGeometry args={[0.34, 40]} />
-        <meshStandardMaterial color="#050608" roughness={0.9} />
       </mesh>
 
-      {/* Corner mounting screws */}
+      {/* Corner screws (both faces) */}
       {[
         [-0.33, 0.33],
         [0.33, 0.33],
         [-0.33, -0.33],
         [0.33, -0.33],
       ].map(([x, y], i) => (
-        <mesh key={i} position={[x, y, 0.035]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.03, 0.03, 0.02, 12]} />
+        <mesh key={i} position={[x, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.03, 0.03, 0.075, 12]} />
           <meshStandardMaterial color="#9aa3a9" metalness={0.9} roughness={0.2} />
         </mesh>
       ))}
 
-      {/* RGB ring (faces forward; no sideways rotation) */}
+      {/* RGB ring: FRONT (inside the case) */}
       <RGBGlow position={[0, 0, 0.036]} speed={0.12} offset={rgbOffset}>
         <torusGeometry args={[0.355, 0.016, 10, 48]} />
       </RGBGlow>
 
-      {/* Spinning blades */}
-      <group ref={blades} position={[0, 0, 0.04]}>
+      {/* RGB ring: BACK (shows through the mesh from outside) */}
+      <RGBGlow position={[0, 0, -0.036]} speed={0.12} offset={rgbOffset}>
+        <torusGeometry args={[0.355, 0.016, 10, 48]} />
+      </RGBGlow>
+
+      {/* Motor struts on the back (like a real fan) */}
+      {[0, 1, 2, 3].map((i) => {
+        const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
+        return (
+          <mesh
+            key={`strut-${i}`}
+            position={[Math.cos(a) * 0.2, Math.sin(a) * 0.2, -0.022]}
+            rotation={[0, 0, a]}
+          >
+            <boxGeometry args={[0.28, 0.018, 0.012]} />
+            <meshStandardMaterial color="#15191d" metalness={0.5} roughness={0.4} />
+          </mesh>
+        );
+      })}
+
+      {/* Spinning blades (visible from both sides) */}
+      <group ref={blades} position={[0, 0, 0.005]}>
         {[0, 1, 2, 3, 4, 5, 6].map((i) => {
           const angle = (i / 7) * Math.PI * 2;
           return (
@@ -4868,17 +4920,19 @@ function FanVisual({
         })}
       </group>
 
-      {/* Center hub */}
-      <mesh position={[0, 0, 0.05]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.08, 0.08, 0.03, 24]} />
+      {/* Hub: runs front to back */}
+      <mesh position={[0, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.08, 0.08, 0.06, 24]} />
         <meshStandardMaterial color="#0d1013" metalness={0.4} roughness={0.4} />
       </mesh>
 
-      {/* Hub cap */}
-      <mesh position={[0, 0, 0.066]}>
-        <circleGeometry args={[0.055, 24]} />
-        <meshStandardMaterial color="#1c2126" metalness={0.7} roughness={0.25} />
-      </mesh>
+      {/* Hub caps (front + back) */}
+      {[0.031, -0.031].map((z) => (
+        <mesh key={`cap-${z}`} position={[0, 0, z]} rotation={[0, z > 0 ? 0 : Math.PI, 0]}>
+          <circleGeometry args={[0.06, 24]} />
+          <meshStandardMaterial color="#1c2126" metalness={0.7} roughness={0.25} />
+        </mesh>
+      ))}
 
     </group>
   );
