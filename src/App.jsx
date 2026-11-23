@@ -2584,7 +2584,12 @@ function ComputerCase({
       <GPUSlots />
       <PSUMount />
       <HDDCage />
-      <CaseFans installed={installed} powered={powered} />
+            <CaseFans
+        installed={installed}
+        powered={powered}
+        mode={mode}
+        onRemovePart={onRemovePart}
+      />
       <InstalledComponents
         installed={installed}
         mode={mode}
@@ -4503,6 +4508,8 @@ function CableGrommets() {
 function CaseFans({
   installed,
   powered = false,
+  mode = "assemble",
+  onRemovePart = () => {},
 }) {
   // In this case the RIGHT wall is the front (intake) and the LEFT wall is the rear (exhaust).
   const innerRight = CASE.width / 2 - 0.15;   //  2.30, just inside the right wall
@@ -4529,18 +4536,42 @@ function CaseFans({
  />
 
       {/* FRONT INTAKE (right wall), facing into the case */}
-      {intakeYs.map((y, i) => {
+            {intakeYs.map((y, i) => {
         const isInstallableFan = i === 1;
         if (isInstallableFan && !fanInstalled) return null;
 
-        return (
+        const fan = (
           <FanVisual
-            key={`intake-${i}`}
             position={[innerRight, y, 0]}
             rotation={[0, -Math.PI / 2, 0]}
             spinning={powered}
             rgbOffset={i * 0.12}
           />
+        );
+
+        // Top and bottom fans come with the case: not removable
+        if (!isInstallableFan) {
+          return <group key={`intake-${i}`}>{fan}</group>;
+        }
+
+        // Middle fan = the "Case Fan" part: click to remove in Disassembly
+        return (
+          <group
+            key={`intake-${i}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (mode === "disassemble") onRemovePart("fan");
+            }}
+            onPointerOver={(e) => {
+              e.stopPropagation();
+              if (mode === "disassemble") document.body.style.cursor = "pointer";
+            }}
+            onPointerOut={() => {
+              document.body.style.cursor = "default";
+            }}
+          >
+            {fan}
+          </group>
         );
       })}
 
