@@ -6929,7 +6929,7 @@ const RACK_LABELS = {
 };
 
 /* ★ Max size a part can take up inside its card (leaves room for the label) */
-const RACK_FIT = { maxW: 1.30, maxH: 0.62, maxScale: 1.8 };
+const RACK_FIT = { maxW: 0.85, maxH: 0.55, maxScale: 1.2 };
 
 function PartsRack({ installed = [], show = true }) {
   const left = RACK.cols[0] - 0.85;
