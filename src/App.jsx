@@ -483,19 +483,187 @@ const FAULTS = [
     explanation:
       "The case fan connector powers the case fan from the motherboard header. If it is unplugged, the fan stops and airflow inside the case drops.",
   },
-  {
+    {
     partId: "powerSW",
     symptom:
-      "The motherboard standby LED is on, but pressing the case power button does nothing.",
+     "The motherboard standby LED is on, but pressing the case power button does nothing.",
     distractors: ["atx24", "psu", "eps8"],
     explanation:
-      "The Power SW header links the case power button to the motherboard. Standby power is present, but the board never receives the \"start\" signal.",
+     "The Power SW header links the case power button to the motherboard. Standby power is present, but the board never receives the \"start\" signal.",
+  },
+
+  /* ===== NEW FAULTS ===== */
+
+  {
+    partId: "cpu",
+    symptom:
+     "The fans spin at full speed, but there is no display and no beep. The CPU debug LED on the motherboard stays lit.",
+    distractors: ["ram", "eps8", "cooler"],
+    explanation:
+     "Without a CPU in the socket, nothing can run the POST check, so the board stops at the very first step and lights the CPU debug LED.",
+  },
+  {
+    partId: "cooler",
+    symptom:
+     "The PC reaches the BIOS, but the CPU temperature climbs above 95°C within seconds and the PC shuts itself down.",
+    distractors: ["cpuFan", "caseFan", "fan"],
+    explanation:
+     "The CPU cooler pulls heat away from the processor. Without it, the CPU overheats almost instantly and the board shuts down to protect it.",
+  },
+  {
+    partId: "gpu",
+    symptom:
+     "The PC powers on and gives a single short beep, but the monitor says \"No Signal\". The monitor cable is plugged into the graphics card port at the back.",
+    distractors: ["gpuPower", "ram", "cpu"],
+    explanation:
+     "The monitor is connected to the graphics card's output. If the graphics card is not installed, nothing sends a picture to that port.",
+  },
+  {
+    partId: "psu",
+    symptom:
+     "Pressing the power button does nothing at all. No fans, no lights, no standby LED, and no fan noise from the bottom of the case.",
+    distractors: ["atx24", "powerSW", "eps8"],
+    explanation:
+     "The Power Supply Unit is the source of all power in the PC. Without it, no part of the system can receive any electricity.",
+  },
+  {
+    partId: "hdd",
+    symptom:
+     "The PC boots normally from the SSD, but the 2 TB storage drive is missing in File Explorer. The BIOS shows \"SATA Port 1: Not Present\".",
+    distractors: ["sataData", "sataPower", "ssd"],
+    explanation:
+     "If the hard drive itself is not installed, there is nothing on the SATA port for the BIOS to detect, even if the cables are connected.",
+  },
+  {
+    partId: "cmos",
+    symptom:
+     "Every time the PC is unplugged, the date and time reset and the BIOS settings are lost. A \"CMOS Checksum Error\" appears at startup.",
+    distractors: ["ram", "chipset", "psu"],
+    explanation:
+     "The CMOS battery keeps the BIOS settings and the clock running while the PC is unplugged. Without it, the settings are lost every time.",
+  },
+  {
+    partId: "chipset",
+    symptom:
+     "The PC powers on but stops at a \"PCH Error\" screen. The USB ports and SATA drives do not work.",
+    distractors: ["cpu", "ssd", "sataData"],
+    explanation:
+     "The chipset (PCH) controls the USB ports, SATA ports and other connections. Without it, the board cannot start those devices.",
+  },
+  {
+    partId: "pcieWifi",
+    symptom:
+     "Windows loads normally, but no Wi-Fi networks appear and Device Manager shows no wireless adapter.",
+    distractors: ["pcieSound", "ssd", "chipset"],
+    explanation:
+     "The PCIe Wi-Fi card is what lets the PC connect to wireless networks. If it is not installed, Windows has no Wi-Fi adapter to use.",
+  },
+  {
+    partId: "pcieSound",
+    symptom:
+     "Windows loads, but the speakers make no sound. The volume icon says \"No Audio Output Device is installed\".",
+    distractors: ["pcieWifi", "chipset", "gpu"],
+    explanation:
+     "The sound card handles audio output to the speakers. Without it, Windows has no audio device to send sound to.",
+  },
+  {
+    partId: "fan",
+    symptom:
+     "The PC works, but the BIOS shows \"SYS_FAN: No fan detected\" and the temperature inside the case keeps rising during use.",
+    distractors: ["caseFan", "cpuFan", "cooler"],
+    explanation:
+     "The case fan moves cool air through the case. If the fan itself is missing, there is nothing for the SYS_FAN header to detect, and airflow drops.",
   },
 ];
 
 const pickFault = (excludePartId = null) => {
   const pool = FAULTS.filter((f) => f.partId !== excludePartId);
   return pool[Math.floor(Math.random() * pool.length)];
+};
+
+/* =========================================================
+   FAULT SCREENS: what the monitor shows when the student
+   presses power on a faulty PC.
+   Any fault NOT listed here shows "No Signal".
+========================================================= */
+
+const NO_SIGNAL = { type: "nosignal" };
+
+const FAULT_SCREENS = {
+  // ----- BIOS error screens -----
+  ssd: {
+    type: "bios",
+    lines: [
+      "Reboot and Select proper Boot device",
+      "or Insert Boot Media in selected Boot device and press a key_",
+    ],
+  },
+  cpuFan: {
+    type: "bios",
+    lines: ["CPU Fan Error!", "Press F1 to Run SETUP"],
+  },
+  cooler: {
+    type: "bios",
+    lines: [
+      "WARNING: CPU Over Temperature Error!",
+      "CPU Temperature: 97°C",
+      "System will shut down in 5 seconds...",
+    ],
+  },
+  cmos: {
+    type: "bios",
+    lines: [
+      "CMOS Checksum Error - Defaults Loaded",
+      "CMOS Battery Low",
+      "Press F1 to Run SETUP, F2 to Load Default Values",
+    ],
+  },
+  hdd: {
+    type: "bios",
+    lines: ["SATA Port 1: Not Present", "Press DEL to enter Setup"],
+  },
+  sataData: {
+    type: "bios",
+    lines: ["SATA Port 1: Not Detected", "Press DEL to enter Setup"],
+  },
+  sataPower: {
+    type: "bios",
+    lines: ["SATA Port 1: Not Detected", "Press DEL to enter Setup"],
+  },
+  caseFan: {
+    type: "bios",
+    lines: ["SYS_FAN Error! (0 RPM)", "Press F1 to continue"],
+  },
+  fan: {
+    type: "bios",
+    lines: [
+      "Warning: System Temperature High",
+      "SYS_FAN: No fan detected",
+      "Press F1 to continue",
+    ],
+  },
+  chipset: {
+    type: "bios",
+    lines: [
+      "PCH Error",
+      "USB and SATA controllers not initialized",
+      "System Halted",
+    ],
+  },
+
+  // ----- Windows desktop with a notification -----
+  pcieWifi: {
+    type: "desktop",
+    title: "No Wi-Fi networks found",
+    message: "No wireless network adapter was detected.",
+  },
+  pcieSound: {
+    type: "desktop",
+    title: "No Audio Output Device",
+    message: "No audio output device is installed.",
+  },
+
+  // ram, cpu, gpu, gpuPower, atx24, eps8, psu, powerSW → "No Signal"
 };
 
 const shuffle = (list) => {
@@ -948,7 +1116,14 @@ const removePart = (id) => {
           />
 
           <BackIOPlate />
-          <Peripherals powered={powered} />
+           <Peripherals
+  powered={powered}
+  faultScreen={
+    mode === "diagnose" && symptomShown && fault
+      ? FAULT_SCREENS[fault.partId] || NO_SIGNAL
+      : null
+  }
+ />
           <PeripheralCablesWorld powered={powered} />
 
           {PARTS.filter(
@@ -5970,12 +6145,12 @@ function HDDInstalled() {
    PERIPHERALS (Monitor, Keyboard, Mouse, Speakers)
 ========================================================= */
 
-function Peripherals({ powered }) {
+function Peripherals({ powered, faultScreen = null }) {
   const groupPos = [-3.7, 0, -2.2];
 
   return (
     <group position={groupPos}>
-      <Monitor powered={powered} />
+      <Monitor powered={powered} faultScreen={faultScreen} />
       <Keyboard powered={powered} />
       <Mouse powered={powered} />
 
@@ -6024,7 +6199,7 @@ function useBootPhase(powered) {
   return t;
 }
 
-function Monitor({ powered }) {
+function Monitor({ powered, faultScreen = null }) {
   const t = useBootPhase(powered);
 
     const phase = !powered
@@ -6041,6 +6216,12 @@ function Monitor({ powered }) {
       : POST_LINES.length;
 
   const isDesktop = phase === "desktop";
+
+  // Diagnosis mode: PC is faulty, so show the symptom screen instead of booting
+  const showFault = !powered && faultScreen;
+  const faultType = showFault ? faultScreen.type : null;
+  const screenBlue = isDesktop || faultType === "desktop";
+  const screenOn = powered || showFault;
 
   // Modern thin-bezel 16:9 panel
   const PANEL_W = 3.44;
@@ -6110,9 +6291,9 @@ function Monitor({ powered }) {
         <mesh position={[0, 0.005, 0.045]}>
           <planeGeometry args={[SCREEN_W, SCREEN_H]} />
           <meshPhysicalMaterial
-            color={isDesktop ? "#0b1b33" : "#020304"}
-            emissive={isDesktop ? "#1d4ed8" : "#000000"}
-            emissiveIntensity={isDesktop ? 0.9 : 0}
+            color={screenBlue ? "#0b1b33" : faultType === "nosignal" ? "#0a0b0d" : "#020304"}
+            emissive={screenBlue ? "#1d4ed8" : "#000000"}
+            emissiveIntensity={screenBlue ? 0.9 : 0}
             roughness={0.15}
             clearcoat={1}
             clearcoatRoughness={0.08}
@@ -6126,9 +6307,9 @@ function Monitor({ powered }) {
         <mesh position={[1.62, -0.967, 0.042]}>
           <circleGeometry args={[0.008, 16]} />
           <meshStandardMaterial
-            color={powered ? "#ffffff" : "#1f2937"}
-            emissive={powered ? "#ffffff" : "#000000"}
-            emissiveIntensity={powered ? 1.5 : 0}
+            color={powered ? "#ffffff" : showFault ? "#f59e0b" : "#1f2937"}
+            emissive={powered ? "#ffffff" : showFault ? "#f59e0b" : "#000000"}
+            emissiveIntensity={screenOn ? 1.5 : 0}
             toneMapped={false}
           />
         </mesh>
@@ -6136,10 +6317,79 @@ function Monitor({ powered }) {
         {/* Soft screen glow on the desk */}
         <pointLight
           position={[0, 0, 0.6]}
-          intensity={powered ? 0.8 : 0}
+          intensity={screenOn ? 0.8 : 0}
           distance={3}
-          color={isDesktop ? "#3b82f6" : "#94a3b8"}
+          color={screenBlue ? "#3b82f6" : "#94a3b8"}
         />
+                {/* ===== FAULT: No Signal (monitor's own message box) ===== */}
+        {faultType === "nosignal" && (
+          <>
+            <mesh position={[0, 0, 0.05]}>
+              <planeGeometry args={[1.3, 0.45]} />
+              <meshBasicMaterial color="#1f2937" />
+            </mesh>
+            <Text position={[0, 0.06, 0.052]} fontSize={0.11} color="#e5e7eb" anchorX="center" anchorY="middle">
+              No Signal
+            </Text>
+            <Text position={[0, -0.10, 0.052]} fontSize={0.045} color="#9ca3af" anchorX="center" anchorY="middle">
+              Check the cable connection (HDMI / DP)
+            </Text>
+          </>
+        )}
+
+        {/* ===== FAULT: BIOS error text ===== */}
+        {faultType === "bios" && (
+          <>
+            <Text position={[-1.50, 0.80, 0.05]} fontSize={0.06} color="#6b7280" anchorX="left">
+              LAB-X BIOS v2.10
+            </Text>
+            {faultScreen.lines.map((line, i) => (
+              <Text
+                key={i}
+                position={[-1.50, 0.55 - i * 0.18, 0.05]}
+                fontSize={0.085}
+                color={i === 0 ? "#facc15" : "#cbd5e1"}
+                anchorX="left"
+              >
+                {line}
+              </Text>
+            ))}
+          </>
+        )}
+
+        {/* ===== FAULT: Windows desktop with a notification ===== */}
+        {faultType === "desktop" && (
+          <>
+            {/* taskbar */}
+            <mesh position={[0, -0.87, 0.05]}>
+              <planeGeometry args={[SCREEN_W, 0.14]} />
+              <meshBasicMaterial color="#0f172a" />
+            </mesh>
+
+            {/* notification card (bottom right) */}
+            <mesh position={[1.05, -0.52, 0.05]}>
+              <planeGeometry args={[1.15, 0.42]} />
+              <meshBasicMaterial color="#1e293b" />
+            </mesh>
+            <mesh position={[0.52, -0.42, 0.052]}>
+              <circleGeometry args={[0.035, 20]} />
+              <meshBasicMaterial color="#f59e0b" />
+            </mesh>
+            <Text position={[0.62, -0.42, 0.053]} fontSize={0.055} color="#f8fafc" anchorX="left" anchorY="middle">
+              {faultScreen.title}
+            </Text>
+            <Text
+              position={[0.50, -0.56, 0.053]}
+              fontSize={0.042}
+              color="#94a3b8"
+              anchorX="left"
+              anchorY="top"
+              maxWidth={1.05}
+            >
+              {faultScreen.message}
+            </Text>
+          </>
+        )}
 
         {/* ===== 1. BOOT LOGO ===== */}
         {phase === "logo" && (
