@@ -2565,8 +2565,9 @@ function ComputerCase({
         CASE.z,
       ]}
     >
-
+      
       <CaseFrame />
+      <CaseInteriorLight />
       <TopIOPanel
         onPower={onPower}
         powered={powered}
@@ -2582,7 +2583,7 @@ function ComputerCase({
       )}
       <Motherboard />
       <GPUSlots />
-      <PSUMount />
+      <PSUMount psuInstalled={installed.includes("psu")} />
       <HDDCage />
             <CaseFans
         installed={installed}
@@ -2604,6 +2605,50 @@ function ComputerCase({
 /* =========================================================
    CASE FRAME
 ========================================================= */
+
+/* =========================================================
+   CASE INTERIOR LIGHT: white LED bar under the roof
+   Lights up the motherboard so sockets and labels are readable.
+========================================================= */
+
+function CaseInteriorLight() {
+  const W = CASE.width;
+  const H = CASE.height;
+  const D = CASE.depth;
+
+  return (
+    <group>
+      {/* LED bar along the front edge of the roof (inside) */}
+      <mesh position={[0, H - 0.09, D / 2 - 0.30]}>
+        <boxGeometry args={[W - 0.5, 0.02, 0.04]} />
+        <meshStandardMaterial
+          color="#ffffff"
+          emissive="#eef3ff"
+          emissiveIntensity={2}
+          toneMapped={false}
+        />
+      </mesh>
+
+      {/* Bar housing (so the LED looks mounted) */}
+      <mesh position={[0, H - 0.07, D / 2 - 0.30]}>
+        <boxGeometry args={[W - 0.4, 0.02, 0.08]} />
+        <meshStandardMaterial color="#1c2126" metalness={0.8} roughness={0.3} />
+      </mesh>
+
+      {/* The actual light: two soft points shining down onto the board */}
+      {[-1.1, 1.1].map((x) => (
+        <pointLight
+          key={`interior-light-${x}`}
+          position={[x, H - 0.35, 0.4]}
+          intensity={1.4}
+          distance={6}
+          decay={2}
+          color="#eef3ff"
+        />
+      ))}
+    </group>
+  );
+}
 
 function CaseFrame() {
   const W = CASE.width;
@@ -4296,36 +4341,96 @@ function GPUSlots() {
    PSU MOUNT
 ========================================================= */
 
-function PSUMount() {
+function PSUMount({ psuInstalled = false }) {
   // Same center as the installed PSU (SLOTS.psu → case-local [1.60, 0.95, 0.92])
-  // Installed PSU body = 0.90 W × 0.65 H × 1.15 D → bottom at local y -0.325
-  // The shroud runs from the case floor (world 0.08 → local -0.87) up to the PSU bottom,
-  // so the PSU sits ON it and its top face (with the cable ports) is visible.
+  // Installed PSU body = 0.90 W × 0.65 H × 1.15 D (local y -0.325 → 0.325)
+  // Shroud runs from the case floor (local -0.87) up to the PSU bottom (-0.325).
+
+  // Ghost outline of the PSU (edges only, no diagonal lines)
+  const ghostEdges = useMemo(
+    () => new THREE.EdgesGeometry(new THREE.BoxGeometry(0.90, 0.65, 1.15)),
+    []
+  );
+
+  const lineMat = useRef();
+  const fillMat = useRef();
+
+  // Gentle pulse while the bay is empty
+  useEffect(() => {
+    if (psuInstalled || !lineMat.current || !fillMat.current) return undefined;
+
+    const a1 = animate(lineMat.current, {
+      opacity: [0.3, 0.95],
+      duration: 900,
+      alternate: true,
+      loop: true,
+      ease: "inOutSine",
+    });
+    const a2 = animate(fillMat.current, {
+      opacity: [0.03, 0.12],
+      duration: 900,
+      alternate: true,
+      loop: true,
+      ease: "inOutSine",
+    });
+
+    return () => {
+      a1.pause();
+      a2.pause();
+    };
+  }, [psuInstalled]);
+
   return (
     <group position={[1.60, 0.95, 0.92]}>
 
-      {/* PSU shroud / stand: height 0.545, center -0.5975 */}
+      {/* ===== Shroud / stand (plain, so it doesn't look like a PSU) ===== */}
       <RoundedBox
         args={[1.00, 0.545, 1.10]}
         position={[0, -0.5975, 0]}
         radius={0.03}
         smoothness={3}
       >
-        <meshStandardMaterial color="#111418" metalness={0.55} roughness={0.35} />
+        <meshStandardMaterial color="#0d1014" metalness={0.6} roughness={0.4} />
       </RoundedBox>
 
-      {/* Vent slots on the shroud front */}
-      {[...Array(6)].map((_, i) => (
-        <mesh key={`shroud-vent-${i}`} position={[-0.30 + i * 0.12, -0.52, 0.552]}>
-          <boxGeometry args={[0.06, 0.16, 0.006]} />
-          <meshStandardMaterial color="#05070a" roughness={0.8} />
-        </mesh>
-      ))}
+      {/* Inset front panel */}
+      <RoundedBox args={[0.86, 0.34, 0.01]} position={[0, -0.62, 0.553]} radius={0.015} smoothness={2}>
+        <meshStandardMaterial color="#15191e" metalness={0.5} roughness={0.45} />
+      </RoundedBox>
 
-      {/* Label */}
-      <Text position={[0, -0.74, 0.556]} fontSize={0.05} color="#9ea8ae" anchorX="center">
+      {/* Thin accent along the top front edge */}
+      <mesh position={[0, -0.33, 0.55]}>
+        <boxGeometry args={[1.0, 0.012, 0.012]} />
+        <meshStandardMaterial color="#2b333c" metalness={0.8} roughness={0.3} />
+      </mesh>
+
+      <Text position={[0, -0.62, 0.56]} fontSize={0.05} color="#6b7680" anchorX="center" anchorY="middle">
         PSU SHROUD
       </Text>
+
+      {/* ===== Empty bay hint: shows only until the PSU is installed ===== */}
+      {!psuInstalled && (
+        <group>
+          {/* glowing outline */}
+          <lineSegments geometry={ghostEdges}>
+            <lineBasicMaterial ref={lineMat} color="#3b82f6" transparent opacity={0.8} />
+          </lineSegments>
+
+          {/* faint see-through fill */}
+          <mesh>
+            <boxGeometry args={[0.90, 0.65, 1.15]} />
+            <meshBasicMaterial ref={fillMat} color="#3b82f6" transparent opacity={0.06} depthWrite={false} />
+          </mesh>
+
+          {/* label on the front face */}
+          <Text position={[0, 0.06, 0.58]} fontSize={0.09} color="#60a5fa" anchorX="center" anchorY="middle" fontWeight="bold">
+            PSU BAY
+          </Text>
+          <Text position={[0, -0.08, 0.58]} fontSize={0.045} color="#93c5fd" anchorX="center" anchorY="middle">
+            Place the PSU here
+          </Text>
+        </group>
+      )}
 
     </group>
   );
