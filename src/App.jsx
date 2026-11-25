@@ -1751,7 +1751,7 @@ function SimulatorHome({ onSelectMode, studentName, onNameChange, onDownload }) 
   <div className="flow-screen">
       <div className="flow-header">
         <span className="brand-icon">🖥️</span>
-        <h1>PC Assembly Lab</h1>
+        <h1>VirtuRig</h1>
         <p>Choose the simulation you want to practice.</p>
       </div>
 
@@ -2234,7 +2234,7 @@ function Sidebar({
         </span>
 
         <div>
-          <h1>PC Assembly Lab</h1>
+          <h1>VirtuRig</h1>
           <p>Interactive 3D Assembly</p>
         </div>
 
